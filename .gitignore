@@ -1,0 +1,97 @@
+# ============================================
+# PYTHON CACHE & COMPILED FILES
+# ============================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# ============================================
+# NOTEBOOKS & EXPORTS
+# ============================================
+# on ignore les checkpoints + exports lourds.
+*.html
+*.pdf
+
+# ============================================
+# MLFLOW
+# ============================================
+# Ce dossier NE DOIT PAS aller sur GitHub — totalement inutile et très lourd.
+mlruns/
+
+# Par sécurité :
+**/mlruns/
+mlartifacts/
+mlartifacts/**
+
+# ============================================
+# DONNÉES
+# ============================================
+# Ces CSV contiennent soit des résultats, soit des données.
+# À ignorer pour éviter un repo trop lourd ou contenant des données sensibles.
+
+business_cost_summary.csv
+optuna_cost_optimization_summary.csv
+
+# Ignorer aussi le dossier data
+data/
+datasets/
+raw_data/
+
+# ============================================
+# MODELS LOCAUX
+# ============================================
+# Les modèles générés par MLFlow ne doivent pas être commit.
+models/
+model/
+*.pkl
+*.joblib
+*.sav
+
+# ============================================
+# IMAGES / EXPORTS
+# ============================================
+# SHAP et autres images volumineuses
+*.png
+*.jpg
+*.jpeg
+
+# ============================================
+# ENVIRONNEMENTS VIRTUELS
+# ============================================
+venv/
+env/
+.venv/
+
+# ============================================
+# LOGS
+# ============================================
+logs/
+*.log
+
+# ============================================
+# OS SPECIFIC
+# ============================================
+.DS_Store
+Thumbs.db
+
+# ============================================
+# CLOUD / SECRETS
+# ============================================
+# IMPORTANT : ne jamais versionner les clés d'accès
+*.json
+*.pem
+*.key
+
+# ============================================
+# STREAMLIT
+# ============================================
+.streamlit/
+
+# ============================================
+# CSV
+# ============================================
+*.csv
