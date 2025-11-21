@@ -17,6 +17,9 @@ jobs:
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
 
+    - name: Set testing environment variable
+      run: echo "TESTING=1" >> $GITHUB_ENV
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -29,5 +32,4 @@ jobs:
         pip install pytest
 
     - name: Run tests
-      run: |
-        pytest -q
+      run: pytest -q
