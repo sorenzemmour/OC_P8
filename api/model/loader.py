@@ -6,7 +6,7 @@ import mlflow.sklearn
 RUN_ID = "220b6b0558b049688b2ece173f794542"
 MODEL_URI = f"runs:/{RUN_ID}/model"
 
-LOCAL_MODEL_PATH = "api/model/model.pkl"
+LOCAL_MODEL_PATH = "model/model.pkl"
 
 model = None
 
