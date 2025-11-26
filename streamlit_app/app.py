@@ -45,28 +45,29 @@ def build_payload_from_row(row: pd.Series):
 
         value = row[feat]
 
-        # NaN → rejet de la ligne (l'API ne veut pas de null sur champs requis)
+        # NaN → None
         if pd.isna(value):
-           value = None
+            value = None
 
-        # numpy types → types natifs
-        if isinstance(value, np.generic):
-            value = value.item()
+        # Si la valeur est None → on la laisse, l’imputeur de l’API s’en charge
+        if value is None:
+            payload[feat] = None
+            continue
 
-        # Cast explicite des entiers
+        # Si on a une vraie valeur → conversion selon type
         if feat in INT_FEATURES:
             try:
                 value = int(value)
             except Exception:
                 return None, f"Impossible de convertir {feat} en int (valeur={value})"
         else:
-            # float "classique"
             try:
                 value = float(value)
             except Exception:
                 return None, f"Impossible de convertir {feat} en float (valeur={value})"
 
         payload[feat] = value
+
 
     return payload, None
 
@@ -165,8 +166,17 @@ st.subheader("📁 Prédictions à partir d’un fichier CSV")
 uploaded_file = st.file_uploader("Importer un fichier CSV", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    df = clean_dataframe(df)   # 👉 nettoyage automatique
+    df = pd.read_csv(
+        uploaded_file,
+        sep=",",
+        quotechar='"',
+        escapechar="\\",
+        engine="python",
+        on_bad_lines="skip"
+    )
+
+    df = clean_dataframe(df)
+
 
 
     st.write("Aperçu du fichier :")
