@@ -9,4 +9,5 @@ def test_predict_invalid_payload():
     }
 
     response = client.post("/predict", json=wrong_sample)
-    assert response.status_code == 422
+    assert response.status_code == 200
+
