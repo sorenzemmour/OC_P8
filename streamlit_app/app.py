@@ -47,7 +47,7 @@ def build_payload_from_row(row: pd.Series):
 
         # NaN → rejet de la ligne (l'API ne veut pas de null sur champs requis)
         if pd.isna(value):
-            return None, f"Valeur manquante pour la feature {feat}"
+           value = None
 
         # numpy types → types natifs
         if isinstance(value, np.generic):
@@ -69,6 +69,12 @@ def build_payload_from_row(row: pd.Series):
         payload[feat] = value
 
     return payload, None
+
+def clean_dataframe(df):
+    df = df.replace(["", " ", "NA", "N/A", "#N/A", "null"], np.nan)
+    df = df.apply(pd.to_numeric, errors="ignore")
+    return df
+
 
 
 # -------------------------------------------------------------------
@@ -160,6 +166,8 @@ uploaded_file = st.file_uploader("Importer un fichier CSV", type=["csv"])
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
+    df = clean_dataframe(df)   # 👉 nettoyage automatique
+
 
     st.write("Aperçu du fichier :")
     st.dataframe(df.head())
