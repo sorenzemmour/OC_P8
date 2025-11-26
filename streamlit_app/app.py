@@ -170,10 +170,12 @@ if uploaded_file is not None:
         uploaded_file,
         sep=",",
         quotechar='"',
-        escapechar="\\",
+        doublequote=True,
+        escapechar=None,
         engine="python",
-        on_bad_lines="skip"
+        on_bad_lines="warn"
     )
+
 
     df = clean_dataframe(df)
 
