@@ -4,7 +4,9 @@ import numpy as np
 import pandas as pd
 
 # 👉 URL de ton API FastAPI sur Render (avec /predict à la fin)
-API_URL = "https://oc-p7-4.onrender.com/predict"
+#API_URL = "http://127.0.0.1:8000/predict" # Local
+API_URL = "https://oc-p7-4.onrender.com/predict" # Prod
+
 
 # Features attendues par l'API (schéma Pydantic)
 REQUIRED_FEATURES = [
@@ -75,6 +77,57 @@ def clean_dataframe(df):
     df = df.replace(["", " ", "NA", "N/A", "#N/A", "null"], np.nan)
     df = df.apply(pd.to_numeric, errors="ignore")
     return df
+
+def robust_read_csv(file_path_or_buffer):
+    """
+    Lecture robuste du CSV Home Credit :
+    - détecte les lignes "compactées" (toute la ligne dans une seule cellule)
+    - tente de les réparer
+    - sinon les marque comme invalides
+    - renvoie df propre + liste d'erreurs
+    """
+
+    import csv
+
+    valid_rows = []
+    invalid_rows = []
+
+    # Lecture brute ligne par ligne
+    raw_lines = file_path_or_buffer.read().decode("utf-8", errors="ignore").splitlines()
+
+    for idx, line in enumerate(raw_lines):
+
+        # Tentative de découpe CSV standard
+        row = next(csv.reader([line]))
+
+        # Ligne normale → 121 colonnes
+        if len(row) == 121:
+            valid_rows.append(row)
+            continue
+
+        # Tentative de réparation : splitter sur virgules
+        repair = line.split(",")
+
+        if len(repair) == 121:
+            valid_rows.append(repair)
+            continue
+
+        # Impossible de réparer
+        invalid_rows.append({
+            "line_number": idx,
+            "raw_line": line,
+            "reason": f"Ligne contient {len(row)} colonnes détectées"
+        })
+
+    # Construction du DataFrame propre
+    if not valid_rows:
+        raise ValueError("Aucune ligne valide trouvée dans le CSV.")
+
+    # Utilisation des en-têtes de la 1ère ligne valide
+    df = pd.DataFrame(valid_rows[1:], columns=valid_rows[0])
+
+    return df, invalid_rows
+
 
 
 
@@ -166,18 +219,16 @@ st.subheader("📁 Prédictions à partir d’un fichier CSV")
 uploaded_file = st.file_uploader("Importer un fichier CSV", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(
-        uploaded_file,
-        sep=",",
-        quotechar='"',
-        doublequote=True,
-        escapechar=None,
-        engine="python",
-        on_bad_lines="warn"
-    )
-
+    df, invalid_rows = robust_read_csv(uploaded_file)
 
     df = clean_dataframe(df)
+
+    st.write("Aperçu du fichier corrigé :")
+    st.dataframe(df.head())
+
+    if invalid_rows:
+        st.warning(f"{len(invalid_rows)} lignes étaient corrompues.")
+        st.write(pd.DataFrame(invalid_rows))
 
 
 

@@ -30,6 +30,8 @@ def predict(features: CustomerFeatures):
 
     try:
         X = np.array([[features.dict()[f] for f in FEATURE_ORDER]])
+        print("📥 Reçu features:", features.dict())
+        print("🔧 Ordered list:", [features.dict().get(f) for f in FEATURE_ORDER])
         X = preprocess_X(X)  # 👉 imputation automatique
         proba = model.predict_proba(X)[0, 1]
     except Exception as e:
@@ -46,4 +48,5 @@ def predict(features: CustomerFeatures):
         "business_cost_FN": COST_FN,
         "business_cost_FP": COST_FP
     }
+
 
