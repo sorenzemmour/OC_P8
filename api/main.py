@@ -33,6 +33,10 @@ def predict(features: CustomerFeatures):
         print("📥 Reçu features:", features.dict())
         print("🔧 Ordered list:", [features.dict().get(f) for f in FEATURE_ORDER])
         X = preprocess_X(X)  # 👉 imputation automatique
+
+        # 🔒 Sécurisation obligatoire : garantir un shape (1, n)
+        X = np.array(X).reshape(1, -1)
+
         # 🔧 Support du dummy model pendant les tests
         if hasattr(model, "predict_proba"):
             proba = model.predict_proba(X)[0, 1]
