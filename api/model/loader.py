@@ -1,5 +1,6 @@
 import os
 import joblib
+import numpy as np
 
 # Détection du mode test (GitHub Actions)
 TESTING = os.getenv("TESTING") == "1"
