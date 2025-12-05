@@ -5,7 +5,7 @@ import numpy as np
 # Détection du mode test (GitHub Actions)
 TESTING = os.getenv("TESTING") == "1"
 
-LOCAL_MODEL_PATH = "model/model.pkl"
+LOCAL_MODEL_PATH = "api/model/model.pkl"
 
 model = None
 
