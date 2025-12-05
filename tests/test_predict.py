@@ -18,10 +18,11 @@ VALID_SAMPLE = {
 
 def test_predict_valid_payload():
     response = client.post("/predict", json=VALID_SAMPLE)
+    print("DEBUG RESPONSE:", response.json())
+
+    response = client.post("/predict", json=VALID_SAMPLE)
     assert response.status_code == 200
     data = response.json()
-
-    print(response.json())
 
     assert "probability_default" in data
     assert "prediction" in data
