@@ -1,13 +1,35 @@
 import numpy as np
-import pandas as pd
-from sklearn.impute import SimpleImputer
+import joblib
+import os
 
-# Même stratégie que ton notebook
-imputer = SimpleImputer(strategy="median")
+TESTING = os.getenv("TESTING") == "1"
+
+IMPUTER_PATH = "model/imputer.pkl"
+
+# Charger l'imputer uniquement en mode normal
+imputer = None
+if not TESTING:
+    if os.path.exists(IMPUTER_PATH):
+        imputer = joblib.load(IMPUTER_PATH)
+    else:
+        print(f"⚠️ Attention : imputer non trouvé à {IMPUTER_PATH}. Aucune imputation ne sera appliquée.")
+
 
 def preprocess_X(X):
     """
-    Applique l'imputation sur la matrice X (shape: [1, n_features])
+    Applique le préprocessing sur X :
+    - En mode TESTING → retourne X brut
+    - En mode normal → applique l'imputer pré-entraîné
     """
-    X = np.array(X, dtype=float)
-    return imputer.fit_transform(X) if not hasattr(imputer, "statistics_") else imputer.transform(X)
+    # Mode test : pas de preprocessing
+    if TESTING:
+        return X
+
+    X = np.array(X, dtype=float).reshape(1, -1)
+
+    # Si l’imputer n’a pas été chargé, fallback sans imputation
+    if imputer is None:
+        return X
+
+    # Appliquer imputation réelle
+    return imputer.transform(X)
