@@ -21,6 +21,8 @@ def test_predict_valid_payload():
     assert response.status_code == 200
     data = response.json()
 
+    print(response.json())
+
     assert "probability_default" in data
     assert "prediction" in data
     assert "threshold_used" in data
