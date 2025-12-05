@@ -22,13 +22,18 @@ def load_model():
     if model is not None:
         return model
 
-    # 🧪 MODE TEST : retourne un modèle factice compatible predict_proba
+    # 🧪 MODE TEST : renvoie un dummy model simple
     if TESTING:
         print("🧪 Mode TESTING détecté — utilisation d’un modèle factice.")
+
         class DummyModel:
+            def predict(self, X):
+                return [0]  # cohérent avec un modèle binaire
+
             def predict_proba(self, X):
-                # renvoie probabilité 0.1 de défaut pour éviter erreurs
-                return [[0.9, 0.1]]
+                # Retourne une probabilité stable comme un vrai modèle
+                return np.array([[0.7, 0.3]])  
+
         model = DummyModel()
         return model
 
