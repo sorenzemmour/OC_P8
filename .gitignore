@@ -36,10 +36,15 @@ mlartifacts/**
 business_cost_summary.csv
 optuna_cost_optimization_summary.csv
 
-# Ignorer aussi le dossier data
-data/
+# Ignorer les datasets lourds
+data/*
 datasets/
 raw_data/
+
+# Autoriser les exemples / README
+!data/README.md
+!data/sample_*.csv
+
 
 # ============================================
 # MODELS LOCAUX
@@ -82,9 +87,10 @@ Thumbs.db
 # CLOUD / SECRETS
 # ============================================
 # IMPORTANT : ne jamais versionner les clés d'accès
-*.json
+# Secrets uniquement
 *.pem
 *.key
+.env
 
 # ============================================
 # STREAMLIT
