@@ -156,6 +156,37 @@ def get_client(sk_id: int):
     }
 
 
+@app.get("/population/sample")
+def population_sample(n: int = 2000):
+    """
+    Renvoie un échantillon (max n) du dataset de référence, limité à :
+    - SK_ID_CURR
+    - FEATURE_ORDER
+    - DEFAULT_PROFILE_COLUMNS (si dispo)
+    Objectif: alimenter les graphiques du dashboard sans exposer tout le dataset.
+    """
+    try:
+        df = get_clients_df()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    n = min(int(n), len(df))
+
+    cols = ["SK_ID_CURR"]
+    cols += [c for c in FEATURE_ORDER if c in df.columns]
+    cols += [c for c in DEFAULT_PROFILE_COLUMNS if c in df.columns and c not in cols]
+
+    sample = df[cols].sample(n=n, random_state=42).copy()
+
+    # NaN -> None pour JSON propre
+    sample = sample.where(pd.notnull(sample), None)
+
+    return {
+        "n": n,
+        "columns": cols,
+        "rows": sample.to_dict(orient="records"),
+    }
+
 
 
 @app.post("/predict")
