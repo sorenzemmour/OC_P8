@@ -11,6 +11,8 @@ from api.model.loader import load_model
 from api.utils.business_cost import COST_FN, COST_FP
 from api.utils.logging import log_prediction
 from api.model.preprocess import preprocess_X
+from api.explain.shap_explainer import explain_one, top_contributions, get_global_importance
+
 
 
 app = FastAPI(
@@ -169,9 +171,6 @@ def predict(features: CustomerFeatures):
         d = features.dict()
         X = np.array([[d.get(f) for f in FEATURE_ORDER]])
 
-        # Imputation/Preprocess côté API
-        X = preprocess_X(X)
-
         # Sécurisation shape
         X = np.array(X).reshape(1, -1)
 
@@ -196,4 +195,52 @@ def predict(features: CustomerFeatures):
         "threshold_used": THRESHOLD,
         "business_cost_FN": COST_FN,
         "business_cost_FP": COST_FP,
+    }
+
+@app.post("/explain")
+def explain(features: CustomerFeatures, top_n: int = 10):
+    # Modèle (cache)
+    try:
+        model = get_model()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    try:
+        # Même construction que /predict
+        d = features.dict()
+        X = np.array([[d.get(f) for f in FEATURE_ORDER]])
+
+        # Sécurisation shape (1, n)
+        X = np.array(X).reshape(1, -1)
+
+        # Proba / prédiction
+        if hasattr(model, "predict_proba"):
+            proba = float(model.predict_proba(X)[0, 1])
+        else:
+            pred_class = int(model.predict(X)[0])
+            proba = float(pred_class)
+
+        pred = int(proba >= THRESHOLD)
+
+        # SHAP local
+        shap_payload = explain_one(X)  # base_value + shap_values + feature_names
+        local_top = top_contributions(d, shap_payload["shap_values"], top_n=top_n)
+
+        #SHAP gloabl
+        global_imp = get_global_importance(top_n=20)
+
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'explication : {e}")
+
+    return {
+        "probability_default": proba,
+        "prediction": pred,
+        "threshold_used": THRESHOLD,
+        "business_cost_FN": COST_FN,
+        "business_cost_FP": COST_FP,
+        "base_value": shap_payload["base_value"],
+        "top_contributions": local_top,
+        "global_importance": global_imp,
+
     }
