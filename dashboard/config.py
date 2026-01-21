@@ -10,4 +10,4 @@ def get_api_url() -> str:
         pass
 
     # fallback env var (local) puis default
-    return os.getenv("API_URL", "http://127.0.0.1:8000")
+    return os.getenv("API_URL", "https://oc-p8-2.onrender.com/")
