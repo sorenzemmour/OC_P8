@@ -12,7 +12,7 @@ if "current_client" not in st.session_state:
     st.warning("Va d’abord sur l’accueil pour charger un client.")
     st.stop()
 
-api = ApiClient(get_api_url(), timeout=60.0)
+api = ApiClient(get_api_url(), timeout=300)
 
 meta = st.session_state.get("metadata")
 if meta is None:

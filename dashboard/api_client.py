@@ -1,7 +1,7 @@
 import requests
 
 class ApiClient:
-    def __init__(self, base_url: str, timeout: float = 90.0):
+    def __init__(self, base_url: str, timeout: float = 300):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 
