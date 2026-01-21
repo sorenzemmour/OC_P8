@@ -75,6 +75,33 @@ def get_clients_df() -> pd.DataFrame:
 
     return df
 
+def json_safe_dict(d: dict) -> dict:
+    """
+    Convertit un dict issu de pandas/numpy en dict JSON-safe :
+    - NaN / inf / -inf -> None
+    - types numpy -> types Python natifs
+    """
+    out = {}
+    for k, v in d.items():
+        # None reste None
+        if v is None:
+            out[k] = None
+            continue
+
+        # numpy scalar -> python scalar
+        if isinstance(v, (np.generic,)):
+            v = v.item()
+
+        # float NaN/inf -> None
+        if isinstance(v, float):
+            if np.isnan(v) or np.isinf(v):
+                out[k] = None
+                continue
+
+        out[k] = v
+    return out
+
+
 
 # ----------------------------
 # Endpoints
@@ -138,7 +165,7 @@ def get_client(sk_id: int):
     if sub.empty:
         raise HTTPException(status_code=404, detail=f"Client SK_ID_CURR={sk_id} introuvable.")
 
-    row = sub.iloc[0].to_dict()
+    row = json_safe_dict(sub.iloc[0].to_dict())
 
     features = {f: _nan_to_none(row.get(f, None)) for f in FEATURE_ORDER}
 
@@ -177,6 +204,10 @@ def population_sample(n: int = 2000):
     cols += [c for c in DEFAULT_PROFILE_COLUMNS if c in df.columns and c not in cols]
 
     sample = df[cols].sample(n=n, random_state=42).copy()
+
+    rows = [json_safe_dict(r) for r in sample.to_dict(orient="records")]
+    return {"n": n, "columns": cols, "rows": rows}
+
 
     # NaN -> None pour JSON propre
     sample = sample.where(pd.notnull(sample), None)
