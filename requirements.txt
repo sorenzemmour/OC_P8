@@ -1,2 +1,6 @@
-# requirements pour l'API (Render)
--r api/requirements.txt
+# requirements pour le dashboard Streamlit
+streamlit==1.40.1
+requests==2.32.3
+pandas==2.2.2
+numpy==1.26.4
+matplotlib==3.8.4
