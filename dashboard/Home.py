@@ -43,33 +43,31 @@ sk_id = st.number_input("Identifiant client (SK_ID_CURR)", min_value=0, step=1, 
 
 colA, colB = st.columns(2)
 with colA:
-    if st.button("📥 Récupérer le dossier"):
+    if st.button("🔍 Analyser le dossier client"):
         try:
-            r = client.get_client(int(sk_id))
-            if r.status_code == 200:
-                payload = r.json()
-                st.session_state["current_client"] = payload
-                st.success("Dossier client chargé.")
-            else:
-                st.error(f"Erreur {r.status_code} : {r.text}")
-        except Exception as e:
-            st.error(str(e))
+            # 1) Charger le client
+            r_client = client.get_client(int(sk_id))
+            if r_client.status_code != 200:
+                st.error(f"Erreur chargement client : {r_client.status_code} {r_client.text}")
+                st.stop()
 
-with colB:
-    if st.button("🧮 Calculer score (predict)"):
-        if "current_client" not in st.session_state:
-            st.warning("Charge d’abord un client avec 'Récupérer le dossier'.")
-        else:
-            features = st.session_state["current_client"]["features"]
-            try:
-                r = client.predict(features)
-                if r.status_code == 200:
-                    st.session_state["last_predict"] = r.json()
-                    st.success("Score calculé.")
-                else:
-                    st.error(f"Erreur {r.status_code} : {r.text}")
-            except Exception as e:
-                st.error(str(e))
+            payload = r_client.json()
+            st.session_state["current_client"] = payload
+
+            # 2) Calculer le score
+            features = payload["features"]
+            r_pred = client.predict(features)
+            if r_pred.status_code != 200:
+                st.error(f"Erreur calcul score : {r_pred.status_code} {r_pred.text}")
+                st.stop()
+
+            st.session_state["last_predict"] = r_pred.json()
+
+            st.success("✅ Dossier chargé et score calculé.")
+
+        except Exception as e:
+            st.error(f"Erreur inattendue : {e}")
+
 
 st.markdown("---")
 st.write("➡️ Utilise le menu à gauche pour aller sur **Synthèse**, **Explications**, **Comparaisons**, etc.")

@@ -1,7 +1,7 @@
 import requests
 
 class ApiClient:
-    def __init__(self, base_url: str, timeout: float = 20.0):
+    def __init__(self, base_url: str, timeout: float = 90.0):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 
@@ -21,5 +21,5 @@ class ApiClient:
         return requests.post(f"{self.base_url}/explain", params={"top_n": top_n}, json=features, timeout=self.timeout)
 
     def population_sample(self, n: int = 2000):
-    return requests.get(f"{self.base_url}/population/sample", params={"n": n}, timeout=self.timeout)
+        return requests.get(f"{self.base_url}/population/sample", params={"n": n}, timeout=self.timeout)
 
